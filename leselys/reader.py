@@ -99,7 +99,7 @@ class Refresher(threading.Thread):
     def __init__(self, feed):
         threading.Thread.__init__(self)
         self.feed = feed
-        self.feed_id = u(feed['_id'])
+        self.feed_id = feed['_id']
 
     def run(self):
         self.data = feedparser.parse(self.feed['url'])
@@ -119,16 +119,25 @@ class Refresher(threading.Thread):
                 if get_datetime(self.data.updated_parsed) > remote_update:
                     remote_update = get_datetime(self.data.updated_parsed)
                     remote_update_raw = get_dicttime(self.data.updated_parsed)
+            else:
+                remote_update = get_datetime(self.data.updated_parsed)
+                remote_update_raw = get_dicttime(self.data.updated_parsed)
         if self.data.feed.get('published_parsed'):
             if remote_update:
                 if get_datetime(self.data.feed.published_parsed) > remote_update:
                     remote_update = get_datetime(self.data.feed.published_parsed)
                     remote_update_raw = get_dicttime(self.data.feed.published_parsed)
+            else:
+                remote_update = get_datetime(self.data.feed.published_parsed)
+                remote_update_raw = get_dicttime(self.data.feed.published_parsed)
         if self.data.get('published_parsed'):
             if remote_update:
                 if get_datetime(self.data.published_parsed > remote_update):
                     remote_update = get_datetime(self.data.published_parsed)
                     remote_update_raw = get_dicttime(self.data.published_parsed)
+            else:
+                remote_update = get_datetime(self.data.published_parsed)
+                remote_update_raw = get_dicttime(self.data.published_parsed)                
 
         if not remote_update:
             remote_update = datetime.datetime.now()
@@ -139,6 +148,7 @@ class Refresher(threading.Thread):
             readed = []
             for entry in storage.get_stories(self.feed['_id']):
                 if entry['read']:
+                    print(':: Add to reader %s' % entry['title'])
                     readed.append(entry['title'])
 
             if len(self.data.entries) <= int(config.get('worker', 'story_before_retention')):
@@ -151,8 +161,14 @@ class Refresher(threading.Thread):
             retriever.join()
 
             for entry in readed:
+<<<<<<< Updated upstream
                 if storage.get_story_by_title(self.feed['_id'], entry):
                     entry = storage.get_story_by_title(self.feed['_id'], entry)
+=======
+                print(':: yeah')
+                if storage.get_story_by_title(entry):
+                    entry = storage.get_story_by_title(entry)
+>>>>>>> Stashed changes
                     entry['read'] = True
                     storage.update_story(entry['_id'], copy.copy(entry))
 
